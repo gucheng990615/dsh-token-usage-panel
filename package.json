@@ -1,0 +1,51 @@
+{
+  "name": "dsh-token-usage-panel",
+  "version": "1.0.0",
+  "description": "Real-time token usage and account balance panel for DeepSeek Harness: a session-header chip plus a detail popover with per-session and all-session token counts, provider-aware wallet balance, context pressure and speed.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "client.js",
+    "install.ps1",
+    "docs",
+    "tests",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node tests/render-smoke.mjs",
+    "check": "node --check client.js"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "token-usage",
+    "tokens",
+    "balance",
+    "panel"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gucheng990615/dsh-token-usage-panel.git"
+  },
+  "homepage": "https://github.com/gucheng990615/dsh-token-usage-panel#readme",
+  "bugs": {
+    "url": "https://github.com/gucheng990615/dsh-token-usage-panel/issues"
+  },
+  "dsh": {
+    "client": {
+      "platform": "web",
+      "inject": []
+    }
+  }
+}
