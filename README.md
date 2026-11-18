@@ -34,40 +34,62 @@
 
 插件不写会话日志、不产生任何模型可见内容。
 
-## 安装
+## 安装（一条命令）
 
-插件由两半组成：宿主半侧注册同源路由并读取凭据，浏览器半侧提供胶囊与面板。
-
-```bash
-git clone https://github.com/gucheng990615/dsh-token-usage-panel.git
-cd dsh-token-usage-panel
-```
-
-1. 把包链接进你的 profile：
+打开 PowerShell 粘这一行，回车，完事：
 
 ```powershell
-# Windows（PowerShell）
-$profileDir = "$env:USERPROFILE\.dsh\profiles\desktop"   # 或 $env:DSH_PROFILE_DIR
-New-Item -ItemType Junction -Path "$profileDir\node_modules\dsh-token-usage-panel" -Target (Get-Location)
+irm https://raw.githubusercontent.com/gucheng990615/dsh-token-usage-panel/main/install.ps1 | iex
 ```
 
-2. 在 profile 的 `cordis.patch.yml` 末尾加一行装载配置：
+然后**重启 DeepSeek Harness**，会话标题旁就会出现余额胶囊（宿主要重启才注册路由，热加载不覆盖宿主）。
+
+脚本自动完成三件事，不需要 git、不需要手改 YAML：
+
+1. 从 GitHub 下载最新版本（`codeload` zip）
+2. 解压到 `<profile>/node_modules/dsh-token-usage-panel`
+3. 往 `cordis.patch.yml` 追加装载行（先备份为 `.bak-时间戳`，重复执行不会写两次）
+
+| 参数 | 作用 |
+|---|---|
+| `-Ref v1.0.0` | 装指定分支或 tag（默认 `main`） |
+| `-ProfileDir <路径>` | 指定 profile；默认依次找 `$env:DSH_PROFILE_DIR` → `$env:DSH_HOME\profiles\desktop` → `~\.dsh\profiles\desktop` |
+| `-Source <路径>` | 从本地目录安装（改代码时用） |
+| `-Uninstall` | 卸载：删安装目录 + 移除装载行 |
+
+卸载同样一条：
+
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/gucheng990615/dsh-token-usage-panel/main/install.ps1))) -Uninstall
+```
+
+<details>
+<summary>手动安装（不想跑脚本时）</summary>
+
+```powershell
+# 1. 下载并解压到 profile 的 node_modules
+$profileDir = if ($env:DSH_PROFILE_DIR) { $env:DSH_PROFILE_DIR } else { "$env:USERPROFILE\.dsh\profiles\desktop" }
+$dst = "$profileDir\node_modules\dsh-token-usage-panel"
+New-Item -ItemType Directory -Force -Path $dst | Out-Null
+irm https://codeload.github.com/gucheng990615/dsh-token-usage-panel/zip/refs/heads/main -OutFile "$env:TEMP\p.zip"
+Expand-Archive "$env:TEMP\p.zip" -DestinationPath "$env:TEMP\p" -Force
+Copy-Item "$env:TEMP\p\dsh-token-usage-panel-main\*" $dst -Recurse -Force
+```
 
 ```yaml
+# 2. 在 profile 的 cordis.patch.yml 末尾追加
 - insert:
-    - id: token-usage-panel
+    - id: dsh-token-usage-panel
       name: dsh-token-usage-panel
       config:
         apiKeyEnv: DEEPSEEK_API_KEY   # 可选：官方余额用的密钥名
 ```
 
-3. 重启 DeepSeek Harness（宿主模块不会被热加载）。
+3. 重启 DeepSeek Harness。
 
-仓库里的 `install.ps1` 会把上面两步做幂等处理：
+</details>
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\install.ps1
-```
+> macOS / Linux：`git clone` 到 `<profile>/node_modules/dsh-token-usage-panel`，再执行上面第 2 步。
 
 ## 配置 API Key
 
@@ -124,5 +146,6 @@ A DeepSeek Harness plugin that shows live token usage (this session and all sess
 official account balance next to the session title. It reads Session projections from the Host,
 maps API keys found in `$DSH_HOME/.credentials.yaml` to the providers and models that consume
 them, and forwards `GET https://api.deepseek.com/user/balance` through a same-origin Host route
-so the browser never sees the key. Install by linking the package into a profile and adding one
-`insert` row to `cordis.patch.yml`; restart the app afterwards.
+so the browser never sees the key. Install with one command —
+`irm https://raw.githubusercontent.com/gucheng990615/dsh-token-usage-panel/main/install.ps1 | iex` —
+then restart the app.
