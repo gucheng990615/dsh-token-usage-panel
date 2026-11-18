@@ -1,0 +1,16 @@
+node_modules/
+.verify/
+*.log
+.DS_Store
+Thumbs.db
+
+# local secret / state files never belong in the repo
+.dsh-token-usage-panel.json
+*.credentials.yaml
+.env
+.env.*
+
+# IDE project files
+.idea/
+.vscode/
+
